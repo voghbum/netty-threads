@@ -5,9 +5,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
-import io.netty.handler.ssl.SslHandler;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
 import java.net.InetAddress;
@@ -16,7 +15,7 @@ import java.net.InetAddress;
  * Handles a server-side channel.
  */
 public class ChatServerHandler extends SimpleChannelInboundHandler<String> {
-
+    protected static final Logger logger = LogManager.getLogger();
     static final ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     @Override
@@ -27,6 +26,9 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<String> {
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
+        logger.error("wait...");
+        Thread.sleep(10_000);
+        logger.error("finished.");
         // Send the received message to all channels but the current one.
         for (Channel c: channels) {
             if (c != ctx.channel()) {

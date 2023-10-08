@@ -8,6 +8,9 @@ import io.netty.handler.codec.Delimiters;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.ssl.SslContext;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import io.netty.util.concurrent.DefaultThreadFactory;
+import io.netty.util.concurrent.ThreadPerTaskExecutor;
 
 public class ChatServerInitializer extends ChannelInitializer<SocketChannel> {
     @Override
@@ -20,6 +23,6 @@ public class ChatServerInitializer extends ChannelInitializer<SocketChannel> {
         pipeline.addLast(new StringEncoder());
 
         // and then business logic.
-        pipeline.addLast(new ChatServerHandler());
+        pipeline.addLast(new DefaultEventExecutorGroup(2, new DefaultThreadFactory("handler-pool")), "MYHANDLER", new ChatServerHandler());
     }
 }
