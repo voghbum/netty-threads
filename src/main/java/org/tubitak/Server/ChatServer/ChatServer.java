@@ -4,31 +4,32 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.util.SelfSignedCertificate;
 
-public class ChatServer {
-    private final int port;
+public final class ChatServer {
+    static final int PORT = Integer.parseInt(System.getProperty("port", "8992"));
 
-    public static void main(String[] args) throws InterruptedException {
-        new ChatServer(1345).run();
-    }
+    public static void main(String[] args) throws Exception {
+        SelfSignedCertificate ssc = new SelfSignedCertificate();
+        SslContext sslCtx = SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey())
+                .build();
 
-    public ChatServer(int port) {
-        this.port = port;
-    }
-
-    private void run() throws InterruptedException {
-        EventLoopGroup boosGroup = new NioEventLoopGroup();
+        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
-
         try {
-            ServerBootstrap bootstrap = new ServerBootstrap()
-                    .group(boosGroup, workerGroup)
+            ServerBootstrap b = new ServerBootstrap();
+            b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
-                    .childHandler(new ChatServerInitializer());
+                    .handler(new LoggingHandler(LogLevel.DEBUG))
+                    .childHandler(new ChatServerInitializer(sslCtx));
 
-            bootstrap.bind(port).sync().channel().closeFuture().sync();
+            b.bind(PORT).sync().channel().closeFuture().sync();
         } finally {
-            boosGroup.shutdownGracefully();
+            bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
     }
