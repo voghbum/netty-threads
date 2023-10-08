@@ -14,8 +14,8 @@ public final class ChatServer {
 
     public static void main(String[] args) throws Exception {
 
-        EventLoopGroup bossGroup = new NioEventLoopGroup(1, new ThreadPerTaskExecutor(new DefaultThreadFactory("BOSS")));
-        EventLoopGroup workerGroup = new NioEventLoopGroup(2, new ThreadPerTaskExecutor(new DefaultThreadFactory("WORKER")));
+        EventLoopGroup bossGroup = new NioEventLoopGroup(1, new NioEventLoopGroup(new DefaultThreadFactory("BOSS")));
+        EventLoopGroup workerGroup = new NioEventLoopGroup(2, new NioEventLoopGroup(new DefaultThreadFactory("WORKER")));
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
